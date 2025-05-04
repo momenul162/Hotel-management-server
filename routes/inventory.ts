@@ -15,8 +15,8 @@ router.get("/", getInventoryItems);
 router.get("/:id", getInventoryItemById);
 
 // Protected routes - These require authenticated users
-router.post("/", protect, createInventoryItem);
-router.put("/:id", protect, updateInventoryItem);
+router.post("/create", protect, createInventoryItem);
+router.patch("/update/:id", protect, updateInventoryItem);
 router.delete("/:id", protect, deleteInventoryItem);
 
 export const inventoryRoutes = router;

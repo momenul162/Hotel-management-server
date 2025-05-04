@@ -15,8 +15,8 @@ router.get("/", getStaffMembers);
 router.get("/:id", getStaffMemberById);
 
 // Protected routes - These require authenticated users
-router.post("/", protect, createStaffMember);
-router.put("/:id", protect, updateStaffMember);
+router.post("/create", protect, createStaffMember);
+router.patch("/update/:id", protect, updateStaffMember);
 router.delete("/:id", protect, deleteStaffMember);
 
 export const staffRoutes = router;

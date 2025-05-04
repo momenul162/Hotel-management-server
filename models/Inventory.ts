@@ -6,21 +6,20 @@ export const InventorySchema = z.object({
   name: z.string().min(2).max(100),
   category: z.string().min(2).max(50),
   quantity: z.number().int().min(0),
-  minimumStock: z.number().int().min(0),
-  unitPrice: z.number().min(0),
+  minimumQuantity: z.number().int().min(0),
   supplier: z.string().min(2).max(100),
-  lastRestocked: z.string().optional(),
+  lastRestocked: z.string().refine((value) => !isNaN(Date.parse(value)), {
+    message: "Invalid date format",
+  }),
 });
 
 export type InventoryType = z.infer<typeof InventorySchema>;
 
-// Mongoose Schema
 interface IInventory extends Document {
   name: string;
   category: string;
   quantity: number;
-  minimumStock: number;
-  unitPrice: number;
+  minimumQuantity: number;
   supplier: string;
   lastRestocked: Date;
 }
@@ -46,12 +45,7 @@ const inventorySchema = new Schema<IInventory>(
       required: true,
       min: 0,
     },
-    minimumStock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    unitPrice: {
+    minimumQuantity: {
       type: Number,
       required: true,
       min: 0,

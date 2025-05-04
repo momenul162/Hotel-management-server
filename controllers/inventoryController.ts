@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { Inventory, InventorySchema } from "../models/Inventory";
+import mongoose from "mongoose";
 
 // Get all inventory items
-export const getInventoryItems = async (req: Request, res: Response) => {
+export const getInventoryItems = async (_req: Request, res: Response) => {
   try {
     const inventory = await Inventory.find().sort({ createdAt: -1 });
     res.json(inventory);
@@ -30,7 +31,13 @@ export const getInventoryItemById = async (req: Request, res: Response) => {
 export const createInventoryItem = async (req: Request, res: Response) => {
   try {
     // Validate request body
-    const validatedData = InventorySchema.parse(req.body);
+    const validationResult = InventorySchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res
+        .status(400)
+        .json({ message: "Validation error", errors: validationResult.error.errors });
+    }
+    const validatedData = validationResult.data;
 
     // Create new inventory item
     const item = await Inventory.create(validatedData);
@@ -44,11 +51,19 @@ export const createInventoryItem = async (req: Request, res: Response) => {
 // Update inventory item
 export const updateInventoryItem = async (req: Request, res: Response) => {
   try {
-    // Validate request body
-    const validatedData = InventorySchema.parse(req.body);
+    const validationResult = InventorySchema.partial().safeParse(req.body);
 
-    // Update inventory item
-    const item = await Inventory.findByIdAndUpdate(req.params.id, validatedData, {
+    if (!validationResult.success) {
+      return res
+        .status(400)
+        .json({ message: "Validation error", errors: validationResult.error.errors });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    const item = await Inventory.findByIdAndUpdate(req.params.id, validationResult.data, {
       new: true,
       runValidators: true,
     });
@@ -57,15 +72,23 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Inventory item not found" });
     }
 
-    res.json(item);
+    res.status(200).json(item);
   } catch (error) {
-    res.status(400).json({ message: "Error updating inventory item", error });
+    res.status(500).json({
+      message: "Error updating inventory item",
+      error: error instanceof Error ? error.message : error,
+    });
   }
 };
 
 // Delete inventory item
 export const deleteInventoryItem = async (req: Request, res: Response) => {
   try {
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
     const item = await Inventory.findByIdAndDelete(req.params.id);
 
     if (!item) {
@@ -74,6 +97,9 @@ export const deleteInventoryItem = async (req: Request, res: Response) => {
 
     res.json({ message: "Inventory item removed" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting inventory item", error });
+    res.status(500).json({
+      message: "Error deleting inventory item",
+      error: error instanceof Error ? error.message : error,
+    });
   }
 };

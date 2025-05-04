@@ -20,7 +20,8 @@ export const getRoomById = async (roomId: string) => {
 
 // Update a room
 export const updateRoom = async (roomId: string, updatedData: Partial<RoomType>) => {
-  const validatedData = RoomSchema.partial().parse(updatedData); // Validate updates
+  const validatedData = RoomSchema.partial().parse(updatedData);
+
   const room = await Room.findByIdAndUpdate(roomId, validatedData, {
     new: true,
     runValidators: true,

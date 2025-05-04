@@ -18,11 +18,15 @@ import { roomRoutes } from "./routes/rooms";
 import { guestRoutes } from "./routes/guests";
 import { searchRoute } from "./routes/search";
 import { bookingRoutes } from "./routes/bookings";
+import { inventoryRoutes } from "./routes/inventory";
+import { staffRoutes } from "./routes/staff";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/staff", staffRoutes);
 app.use("/api", searchRoute);
 
 // Root route
